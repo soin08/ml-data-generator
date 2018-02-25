@@ -11,6 +11,3 @@ class SetProperties:
     intersects: List[int]
     linearly_separable: List[int]
     distances: List[int]
-
-
-print ("hi chicken")
