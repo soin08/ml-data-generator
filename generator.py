@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d, Axes3D
 from typing import List
 import math
 import numpy as np
@@ -22,7 +23,7 @@ class Set:
             self.props.scale_coefs = [1] * self.props.num_features
 
         if self.props.center is None or not len(self.props.center) == self.props.num_features:
-            self.props.radius = [0] * self.props.num_features
+            self.props.radius = [1] * self.props.num_features
 
     def create_points(self):
         for point_id in range(self.props.num_samples):
@@ -30,6 +31,7 @@ class Set:
             radius = np.random.uniform(0, self.props.radius)
             norm = math.sqrt(sum([el * el for el in vector]))
             self.points[point_id] = [cord / norm * radius + self.props.center[ix] for ix, cord in enumerate(vector)]
+            print(self.props.scale_coefs)
             self.points[point_id] *= self.props.scale_coefs
 
 
@@ -48,17 +50,31 @@ class World:
         plt.figure(figsize=(10, 10))
         axis_val = 50
         plt.axis([-30, axis_val, -30, axis_val])
+        for s in self.sets:
+            x = s.points[:, 0]
+            y = s.points[:, 1] if s.points.shape[1] >= 2 else np.zeros(s.points.shape[0])
+            plt.scatter(x, y)
+        plt.show()
 
-        for set in self.sets:
-            plt.scatter(set.points[:, 0], set.points[:, 1])
+    def plot_3d(self):
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        for s in self.sets:
+            x = s.points[:, 0]
+            y = s.points[:, 1] if s.points.shape[1] >= 2 else np.zeros(s.points.shape[0])
+            z = s.points[:, 2] if s.points.shape[1] >= 3 else np.zeros(s.points.shape[0])
+            ax.scatter(x, y, z)
         # plt.plot(self.points[:, feature1], self.points[:, feature2], 'ro')
         plt.show()
 
 
 if __name__ == "__main__":
-    props = [Properties(radius=10, num_samples=int(1e3), num_features=3, scale_coefs=[3, 4, 1], center=[5, 5, 5]),
-             Properties(radius=3, num_samples=int(1e2), num_features=3, center=[16, 16, 6]),
-             Properties(radius=8, num_samples=int(1e2), num_features=2, scale_coefs=[1, 2], center=[-10, -5])]
+    props = [Properties(radius=10, num_samples=int(1e3), num_features=3,
+                        scale_coefs=[2, 1, 4],
+                        center=[1, 1, 1]),
+             Properties(radius=7, num_samples=int(1e2), num_features=3, center=[-5, 2, 9]),
+             Properties(radius=10, num_samples=int(1e3), num_features=2, scale_coefs=[1, 2], center=[-10, -5])
+             ]
 
     world = World(props)
     world.create_sets()
