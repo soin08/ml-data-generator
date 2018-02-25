@@ -13,3 +13,4 @@ class SetProperties:
     distances: List[int]
 
 
+print ("hi chicken")
