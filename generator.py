@@ -8,32 +8,53 @@ import numpy as np
 @dataclass
 class Properties:
     radius: int = 5
-    num_samples: int = 1000   #number of points
-    num_features: int = 2    #dimension
-    intersects: List[int] = None
-    distances: List[int] = None
+    num_samples: int = 1000   # number of points
+    num_features: int = 2    # dimensions
+    center: np.ndarray = np.zeros(num_features)
 
 
-class Object:
-    def __init__(self, properties : Properties):
-        self.prop = properties
-        self.points = np.ndarray(shape=(self.prop.num_samples, self.prop.num_features), dtype=float)
-        self.create_points()
+class Set:
+    def __init__(self, properties: Properties):
+        self.props = properties
+        self.points = np.ndarray(shape=(self.props.num_samples, self.props.num_features), dtype=float)
 
     def create_points(self):
-        for point_id in range(self.prop.num_samples):
-            vector = np.random.uniform(-1, 1, self.prop.num_features)
-            radius = np.random.uniform(0, self.prop.radius)
+        for point_id in range(self.props.num_samples):
+            vector = np.random.uniform(-1, 1, self.props.num_features)
+            radius = np.random.uniform(0, self.props.radius)
             norm = math.sqrt(sum([el * el for el in vector]))
-            self.points[point_id] = [cord / norm * radius for cord in vector]
+            # print(type(vector[0]))
+            # print(self.props.center)
+            # print(vector)
+            self.points[point_id] = [cord / norm * radius + self.props.center[ix] for ix, cord in enumerate(vector)]
 
-    def plot(self, feature1: int, feature2: int):
+
+class World:
+    def __init__(self, prop_list: List[Properties]):
+        self.prop_list = prop_list
+        self.sets = []
+
+    def create_sets(self):
+        for prop in self.prop_list:
+            set = Set(prop)
+            set.create_points()
+            self.sets.append(set)
+
+    def plot_2d(self):
         plt.figure(figsize=(10, 10))
-        plt.plot(self.points[:, feature1], self.points[:, feature2], 'ro')
+        for set in self.sets:
+            plt.scatter(set.points[:, 0], set.points[:, 1])
+        # plt.plot(self.points[:, feature1], self.points[:, feature2], 'ro')
         plt.show()
 
 
 if __name__ == "__main__":
-    obj = Object(Properties(radius=10, num_samples=int(1e4), num_features=3))
-    obj.plot(0, 2)
+    props = [Properties(radius=10, num_samples=int(1e3), num_features=3, center=np.array([5, 5, 5])),
+             Properties(radius=3, num_samples=int(1e2), num_features=3, center=np.array([16, 16, 6]))]
+
+    world = World(props)
+    world.create_sets()
+    world.plot_2d()
+    # obj.plot(0, 2)
+
 
