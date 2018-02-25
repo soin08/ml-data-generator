@@ -1,0 +1,2 @@
+dataclasses==0.4
+numpy==1.14.1
