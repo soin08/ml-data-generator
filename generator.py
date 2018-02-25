@@ -5,12 +5,13 @@ import numpy as np
 
 @dataclass
 class SetProperties:
-    num_classes: int
-    num_samples: int
-    num_features: int
-    intersects: List[int]
-    linearly_separable: List[int]
-    distances: List[int]
+    radius: int = 5
+    num_samples: int = 100
+    num_features: int = 2
+    intersects: List[int] = None
+    distances: List[int] = None
 
 
-print ("hi chicken")
+if __name__ == "__main__":
+    circle = SetProperties(num_samples=1234, distances=[1,2,3])
+    print (circle.distances)
