@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d, Axes3D
+from mpl_toolkits.mplot3d import Axes3D
 from typing import List
 import math
 import numpy as np
-
-
+import random
 
 MAX_DIMENSION_SIZE = 10
+
 
 @dataclass
 class Properties:
@@ -19,9 +19,6 @@ class Properties:
 
 
 class Set:
-    max_cords: List[float] = None
-    min_cords: List[float] = None
-
     def __init__(self, properties: Properties):
         self.props = properties
         self.max_cords = [-1e6] * self.props.num_features
@@ -44,11 +41,7 @@ class Set:
             self.min_cords = [min(self.min_cords[i], self.points[point_id][i]) for i in range(self.props.num_features)]
 
 
-
 class World:
-    max_cords: List[float] = None
-    min_cords: List[float] = None
-
     def __init__(self, prop_list: List[Properties]):
         self.prop_list = prop_list
         self.sets = []
@@ -73,7 +66,6 @@ class World:
         for s in self.sets:
             x = s.points[:, cord_x] if s.points.shape[1] >= cord_x + 1 else np.zeros(s.points.shape[0])
             y = s.points[:, cord_y] if s.points.shape[1] >= cord_y + 1 else np.zeros(s.points.shape[0])
-            #y = s.points[:, 1] if s.points.shape[1] >= 2 else np.zeros(s.points.shape[0])
             plt.scatter(x, y)
         plt.show()
 
@@ -85,19 +77,44 @@ class World:
             y = s.points[:, 1] if s.points.shape[1] >= 2 else np.zeros(s.points.shape[0])
             z = s.points[:, 2] if s.points.shape[1] >= 3 else np.zeros(s.points.shape[0])
             ax.scatter(x, y, z)
-        # plt.plot(self.points[:, feature1], self.points[:, feature2], 'ro')
         plt.show()
+
+    def save_csv(self, csvFile):
+        if len(self.sets) == 0:
+            return
+
+        point_arrays = []
+        for ix, s in enumerate(self.sets):
+            label_coumn = np.ndarray(shape=(s.points.shape[0], 1))
+            label_coumn.fill(ix)
+            points = np.append(s.points, label_coumn, axis=1)
+            point_arrays.append(points)
+
+        merged_array = np.concatenate(point_arrays, axis=0)
+        np.savetxt(csvFile, X=merged_array, fmt="%.4f", delimiter=",")
+
+
+def generate_props(num_sets):
+    num_samples_set = (500, 1000, 1500, 2000, 2500, 3000)
+    num_features = random.randint(3, 10)
+    props = []
+
+    for _ in range(num_sets):
+        num_samples = num_samples_set[random.randint(0, len(num_samples_set) - 1)]
+        center = [random.randint(-10, 10) for _ in range(num_features)]
+        scale_coefs = [random.randint(1, 3) for _ in range(num_features)]
+        props.append(Properties(radius=random.randint(3, 10),
+                                num_samples=num_samples,
+                                num_features=num_features,
+                                center=center,
+                                scale_coefs=scale_coefs))
+    return props
 
 
 if __name__ == "__main__":
-    props = [Properties(radius=10, num_samples=int(1e3), num_features=3,
-                        scale_coefs=[2, 1, 4],
-                        center=[1, 1, 1]),
-             Properties(radius=7, num_samples=int(1e2), num_features=3, center=[-5, 2, 9]),
-             Properties(radius=10, num_samples=int(1e3), num_features=2, scale_coefs=[1, 2], center=[-10, -5])
-             ]
-
+    props = generate_props(3)
     world = World(props)
     world.create_sets()
-    world.plot_2d()
+    world.save_csv("data.csv")
+    world.plot_3d()
 
