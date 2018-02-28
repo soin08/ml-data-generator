@@ -79,19 +79,19 @@ class World:
             ax.scatter(x, y, z)
         plt.show()
 
-    def save_csv(self, csvFile):
+    def save_csv(self, csv_file):
         if len(self.sets) == 0:
             return
 
         point_arrays = []
         for ix, s in enumerate(self.sets):
-            label_coumn = np.ndarray(shape=(s.points.shape[0], 1))
-            label_coumn.fill(ix)
-            points = np.append(s.points, label_coumn, axis=1)
+            label_column = np.ndarray(shape=(s.points.shape[0], 1))
+            label_column.fill(ix)
+            points = np.append(s.points, label_column, axis=1)
             point_arrays.append(points)
 
         merged_array = np.concatenate(point_arrays, axis=0)
-        np.savetxt(csvFile, X=merged_array, fmt="%.4f", delimiter=",")
+        np.savetxt(csv_file, X=merged_array, fmt="%.4f", delimiter=",")
 
 
 def generate_props(num_sets):
